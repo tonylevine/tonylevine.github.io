@@ -1,0 +1,193 @@
+<!DOCTYPE HTML>
+<!--
+	Phantom by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Instacart Customer Segmentation Analysis</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+
+							<!-- Logo -->
+								<a href="index.html">
+									<h1><strong>Tony Marziale</strong></h1>
+								</a>
+
+							<!-- Nav -->
+								<nav>
+									<p><a href="index.html">Home</a></p>
+									<p><a href="instacart.html">Instacart Customer Segmentation</a></p>
+									<p><a href="wildfire.html">Wildfire Prediction Model</a></p>
+									<p><a href="sakila.html">Sakila Database Analysis</a></p>
+									<p><a href="influenza.html">Forecasting Flu Season</a></p>
+								</nav>
+
+						</div>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<span class="image main"><img src="images/instacart/grocery.jpg" alt="" width=100%/></span>
+							<h1>Instacart Customer Segmentation Analysis</h1>
+							<p>A Python-based business intelligence analysis and k-means clustering model for open-source Instacart data.</p>
+							<h2>Project Summary</h2>
+							<p><strong>Problem:</strong> Instacart needs to understand its diverse customer base better to increase revenue through data-driven strategies for marketing and product offerings.</p>
+							<p><b>Methodology:</b> Through advanced feature engineering, Principal Component Analysis, and k-Means Clustering applied to the 2017 Instacart Online Grocery Shopping Dataset, I identify four distinct customer groups based on their buying habits, and develop clear, actionable business recommendations for each.</p>
+							<p><b>Key Findings:</b> Discovered four major groups of customers with distinct buying habits.</p>
+							<div>
+								<ul>
+									<li><b>Bulk Shoppers - </b> Placed infrequent large orders for essentials</li>
+									<li><b>Meal Planners - </b> Placed regular repeat orders</li>
+									<li><b>Commuters - </b> Placed frequent, small orders on weekdays</li>
+									<li><b>Impulse Buyers - </b> Placed very frequent, large orders for diverse products</li>
+								</ul>
+							</div>
+							<h2>Data Overview & Preprocessing</h2>
+							<p>The Instacart Online Grocery Shopping Dataset 2017 is an anonymized dataset containing a sample of over 3 million grocery orders from more than 200,000 Instacart users. For each user, the dataset records between 4 and 100 of their orders, with the sequence of products purchased in each order. It also provides the week and hour of day the order was placed, and a relative measure of time between orders. </p>
+							<h4>Data Cleaning</h4>
+							<p>Consistency checks showed the dataset to be largely free of errors, with no duplicate rows and only 16 missing values in the "product_name" column.</p>
+							<h4>Feature Creation</h4>
+							<p>Created the following customer-level aggregated features after grouping by "user_id":</p>
+								<ul>
+									<li><b>Order Count - </b> Total number of orders</li>
+									<li><b>Average Days Between Orders - </b> Mean of "days_since_prior_order"</li>
+									<li><b>Unique Products - </b> Number of unique product IDs</li>
+									<li><b>Weekend Order Ratio - </b> Percent of all orders placed on Saturday or Sunday</li>
+								</ul>
+							<p>After aggregating by order and user:</p>
+								<ul>
+									<li><b>Average Basket Size - </b> Mean number of products per order</li>
+									<li><b>Average Reorder Ratio - </b> Mean percent of reordered products per order</li>
+								</ul>
+							<p>Also determined department preferences for each user in the following manner:</p>
+						<code>dept_preferences = df.groupby(['user_id','department_id']).agg(<br>
+						dept_purchases=('product_id','count')<br>
+						).reset_index()</code>
+						<div><code>dept_preferences['dept_rank'] = dept_preferences.groupby('user_id')['dept_purchases'].rank(ascending=False)</code></div>
+						<div><code>preferred_dept = dept_preferences[dept_preferences['dept_rank']==1][['user_id','department_id']]</code></div>					
+							<div>
+							<p></p>
+							<h4>Data Transformation</h4>
+							<p>Applied StandardScaler to prepare data for Principal Component Analysis.</p>
+							</div>
+							<h2>EDA Findings</h2>
+							<img src="images/instacart/deptsales.png" alt="" width=100%/>
+							<p>Total sales by department show that Produce and Dairy/Eggs departments are far and away the most popular.</p>
+							<img src="images/instacart/prodsales.png" alt="" width=100%/>
+							<p>Ranking products by number of orders shows that bananas are Instacart's top-seller and that organic produce is exceptionally popular in this dataset.</p>
+							<img src="images/instacart/hourlycountbar.png" alt="" width=100%/>
+							<p>Order counts have a bimodal distribution throughout the day, increasing through the morning before dropping slightly in the early afternoon, then rising to a mid-afternoon peak and finally steadily declining.</p>
+							<img src="images/instacart/saletiming.png" alt="" width=100%/>
+							<p>Saturday and Sunday are by far the busiest days for Instacart orders, and show starkly different patterns in order timing.</p>
+							<h2>Methodology: K-Means Clustering</h2>
+							<p>To ensure the best performance of the classification model, I first applied PCA to reduce the dataset's dimensions down to three principal components that explained 74.6% of the variance.</p>
+							<img src="images/instacart/elbow.png" alt="" width=70%/>
+							<p>Using the Elbow Method, I estimated that four clusters should be appropriate for this dataset. After that, applying the k-means clustering algorithm is a rather straightforward process. We can visualize the resulting clusters in PCA space:</p>
+							<img src="images/instacart/newplot.png" alt="" width=100%/>
+							<h2>Cluster Profile Analysis</h2>
+							<img src="images/instacart/profilesheatmap.png" alt="" width=100%/>
+							<h4>First Cluster Characteristics</h4>
+							<ul>
+								<li>Large basket size (11.08 items per order)</li>
+								<li>Infrequent orders (every ~22 days)</li>
+								<li>Weekend-focused (46% of orders on weekends)</li>
+								<li>Lower reorder ratio (29%)</li>
+							</ul>
+							<h4>Interpretation</h4>
+							<p><b>Bulk Shoppers - </b>These customers make fewer but bigger purchases, likely stocking up on essentials. Their weekend shopping habit suggests they have more time to plan large orders.</p>
+							<h4>Second Cluster Characteristics</h4>
+							<ul>
+								<li>Moderate, consistent basket size (9.39 items per order)</li>
+								<li>High reorder ratio (42%)</li>
+								<li>Frequent orders (every ~16 days)</li>
+								<li>Older demographic (avg. age 64)</li>
+							</ul>
+							<h4>Interpretation</h4>
+							<p><b>Meal Planners - </b>These shoppers exhibit habitual buying behavior, likely replenishing staples (e.g., groceries, household essentials). Their high reorder rate suggests predictability.</p>
+							<h4>Third Cluster Characteristics</h4>
+							<ul>
+								<li>Small, frequent orders (every ~13 days)</li>
+								<li>Low weekend shopping (only 28% of orders)</li>
+								<li>Very high reorder ratio (55%)</li>
+								<li>Younger, lower income (avg. age 39, $63k income)</li>
+							</ul>
+							<h4>Interpretation</h4>
+							<p><b>Commuters/Convenience Shoppers - </b>These customers prioritize speed and convenience, likely making quick, need purchases, or possibly are commuters on lunch breaks or before/after work.</p>
+							<h4>Fourth Cluster Characteristics</h4>
+							<ul>
+								<li>Very frequent orders (every ~9 days)</li>
+								<li>Largest basket size (15.42 items)</li>
+								<li>Highest product diversity (162 unique products)</li>
+								<li>High reorder ratio but varied purchases (66%)</li>
+							</ul>
+							<h4>Interpretation</h4>
+							<p><b>Impulse Buyers - </b>These shoppers love exploring new products and make frequent, spontaneous purchases. They are high-value but unpredictable.</p>
+							<img src="images/instacart/pairplot.png" alt="" width=100%/>
+							<h2>Recommended Marketing Strategies</h2>
+							<h3>Bulk Shoppers:</h3>
+							<ul>
+								<li>Volume discounts & bulk promotions (e.g., "Buy 3, Get 30% Off")</li>
+ 								<li>Weekend-exclusive deals to encourage larger purchases</li>
+ 								<li>Loyalty rewards for high basket sizes</li>
+							</ul>
+							<h3>Meal Planners:</h3>
+							<ul>
+								<li>Subscription program for recurring purchases (e.g., "Subscribe & Save")</li>
+ 								<li>Personalized reminders for restocking key items</li>
+ 								<li>Bundle deals on frequently repurchased products</li>
+							</ul>
+							<h3>Commuters:</h3>
+							<ul>
+								<li>Push notifications for fast reordering (e.g., "Need this again? 1-Click Reorder!")</li>
+ 								<li>"Morning Rush" deals on coffee/snacks</li>
+								<li>Lunch specials</li>
+ 								<li>Recommendations for commuter basics: push items like protein bars, or travel-sized toiletries</li>
+							</ul>
+							<h3>Impulse Buyers:</h3>
+							<ul>
+								<li>New product recommendations ("Trending items you might love!")</li>
+ 								<li>Limited-time offers & flash sales</li>
+ 								<li>VIP/loyalty perks to encourage repeat engagement</li>
+							</ul>
+						</div>
+					</div>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<div class="inner">
+							<section>
+								<h2>Links</h2>
+								<ul class="icons">
+									<li><a href="https://github.com/tonylevine" class="icon brands style2 fa-github"><span class="label">GitHub</span></a></li>
+									<li><a href="https://www.linkedin.com/in/tony-marziale" class="icon brands style2 fa-linkedin"><span class="label">LinkedIn</span></a></li>
+									<li><a href="https://public.tableau.com/app/profile/tony.m2908/vizzes" class="icon solid style2 fa-plus"><span class="label">Tableau</span></a></li>
+									<li><a href="#" class="icon solid style2 fa-envelope"><span class="label">Email</span></a></li>
+								</ul>
+							</section>
+						</div>
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
